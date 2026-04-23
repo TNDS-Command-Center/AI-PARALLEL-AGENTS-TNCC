@@ -1,0 +1,43 @@
+# Secrets and env
+.env
+.env.*
+!.env.example
+credentials*
+*.pem
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python (in case users drop Python into scaffolded projects)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Node (in case users drop Node into scaffolded projects)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.next/
+dist/
+build/
+
+# Logs
+*.log
+
+# Scratch
+notes/scratch/
+archive/tmp/
