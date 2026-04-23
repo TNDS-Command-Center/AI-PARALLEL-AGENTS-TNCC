@@ -1,87 +1,104 @@
-# TNDS Parallel Development Framework
+<div align="center">
 
-**Run multiple AI agents on the same project without conflicts.**
+# Parallel Agent Framework
+### Run 2-3 AI agents on the same codebase without conflicts
 
-## What This Is
+[![Docs](https://img.shields.io/badge/Docs-Framework-lightgrey?style=for-the-badge)](docs/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![TNDS](https://img.shields.io/badge/TNDS-truenorthstrategyops.com-0A8EA0?style=for-the-badge)](https://truenorthstrategyops.com)
 
-A provider-agnostic framework for coordinating 2-3 AI agents (Claude, ChatGPT, Ollama, or any LLM) working on the same codebase simultaneously. Each agent owns a track (frontend, backend, devops), follows structured task prompts, and coordinates through a shared log — no merge conflicts, no duplicated work, no silent assumptions.
+<img src="Parallel-AgentStack.png" alt="Parallel Agent Framework" width="260" />
 
-## Who It's For
+</div>
 
-- Solo developers using multiple AI chat windows to build faster
-- Teams adopting AI-assisted parallel development
-- Pipeline Punks students learning multi-agent workflows
-- Anyone tired of AI agents stepping on each other's work
+## What this is
 
-## Quick Start
+A provider-agnostic coordination framework for running multiple AI agents (Claude, ChatGPT, Ollama, or any LLM) on the same project simultaneously. Each agent owns a track, works in declared file zones, and coordinates through a shared log. No merge conflicts, no duplicated work, no silent assumptions.
+
+It is markdown templates, two init scripts, and a protocol. No runtime, no dependencies, no lock-in.
+
+## What it does
+
+- Assigns each agent a **track** (frontend, backend, devops) with declared file zones
+- Enforces a **coordination log** as the single source of truth for task status, blockers, and API contracts
+- Provides a **task completion protocol** so every finished task produces a record, the next prompt, and a log update
+- Defines **integration checkpoints** where agents stop and verify their work connects
+- Ships four **template variants**: 2-agent with zones, 3-agent with a DevOps track, coordination-only (no file rules), and a generic variant
+
+## How it works
+
+```
+  Agent A (Frontend)           Agent B (Backend)           Agent C (DevOps, optional)
+        |                            |                              |
+        |-- src/components/          |-- src/api/                   |-- .github/
+        |-- src/pages/               |-- src/server/                |-- tests/
+        |-- src/styles/              |-- src/db/                    |-- docker/
+        |                            |                              |
+        +---------> AGENT_COORDINATION_LOG.md (shared) <-------------+
+                         |
+                         v
+              Integration Checkpoint
+              (stop, verify, document, continue)
+```
+
+## Quick start
 
 ```bash
-# Clone the framework
-git clone https://github.com/TNDS-Command-Center/tnds-parallel-dev-framework.git
+git clone https://github.com/<your-username>/parallel-agent-framework.git
+cd parallel-agent-framework
+```
 
-# Set up a new project (Windows)
+**Windows (PowerShell):**
+
+```powershell
 .\tools\init-project.ps1 -ProjectPath "C:\Users\you\Desktop\my-project"
+```
 
-# Set up a new project (Mac/Linux)
+**Mac / Linux:**
+
+```bash
+chmod +x tools/init-project.sh
 ./tools/init-project.sh ~/Desktop/my-project
 ```
 
-Then open the generated `AI-INSTRUCTIONS.md` in your project and paste it into each agent's context.
+The script creates `AI-INSTRUCTIONS.md`, `AGENT_COORDINATION_LOG.md`, and starter prompts for each agent. Paste `AI-INSTRUCTIONS.md` into each agent chat window, hand each agent its starter prompt, and go.
 
-## What's Inside
+Full setup walkthrough: [docs/QUICKSTART.md](docs/QUICKSTART.md).
+Framework deep-dive: [docs/README-AI-PARALLEL-DEVELOPMENT.md](docs/README-AI-PARALLEL-DEVELOPMENT.md).
+
+## Project structure
 
 ```
-templates/
-  AI-PROJECT-TEMPLATE-PROMPT.md        # Full 2-agent template with file zones
-  AI-PROJECT-TEMPLATE-3AGENT.md        # 3-agent variant (Frontend/Backend/DevOps)
-  AI-PROJECT-TEMPLATE-TNDS-CLIENT.md   # TNDS Command Center variant
-  AI-AGENT-REFERENCE-CARD.md           # One-page cheat sheet
-  AI-AGENT-NO-FILE-RULES-PROMPT.md     # Coordination-only (no file org rules)
-
-examples/
-  AI-AGENT-EXAMPLE-SAAS-DASHBOARD.md   # Full SaaS dashboard walkthrough
-
-docs/
-  QUICKSTART.md                        # Setup guide
-  README-AI-PARALLEL-DEVELOPMENT.md    # Framework deep-dive
-
-tools/
-  init-project.ps1                     # Windows project scaffolding
-  init-project.sh                      # Mac/Linux project scaffolding
+.
+├── templates/
+│   ├── AI-PROJECT-TEMPLATE-PROMPT.md        # 2-agent with file zones (default)
+│   ├── AI-PROJECT-TEMPLATE-3AGENT.md        # 3-agent (Frontend / Backend / DevOps)
+│   ├── AI-AGENT-NO-FILE-RULES-PROMPT.md     # Coordination-only, no file rules
+│   └── AI-AGENT-REFERENCE-CARD.md           # One-page cheat sheet
+├── examples/
+│   └── AI-AGENT-EXAMPLE-SAAS-DASHBOARD.md   # Worked example
+├── docs/
+│   ├── QUICKSTART.md
+│   └── README-AI-PARALLEL-DEVELOPMENT.md
+└── tools/
+    ├── init-project.ps1                     # Windows scaffolding
+    └── init-project.sh                      # Mac/Linux scaffolding
 ```
 
-## How It Works
-
-1. **Pick a template** — 2-agent, 3-agent, or coordination-only
-2. **Run the setup script** — creates project structure + coordination log
-3. **Open two (or three) AI chat windows** — paste the instructions into each
-4. **Assign tracks** — Agent A gets frontend, Agent B gets backend
-5. **Work in parallel** — agents follow the task protocol and update the shared log
-6. **Hit integration checkpoints** — verify everything connects, then continue
-
-## Core Principles
+## Core principles
 
 - **No silent assumptions** — if an agent needs something, it writes it in the log
 - **Structured handoffs** — every completed task produces a completion record, next prompt, and log update
-- **File zone ownership** — each agent has declared file zones to prevent conflicts
-- **Integration checkpoints** — periodic stops to verify frontend talks to backend
+- **File zone ownership** — each agent has declared zones to prevent conflicts
+- **Integration checkpoints** — periodic stops to verify tracks connect
 - **Provider-agnostic** — works with any LLM that can follow instructions
-
-## Hardware Notes
-
-| Machine | Best For |
-|---------|----------|
-| Windows Desktop (4070, 12GB VRAM) | Heavy code generation, larger Ollama models (up to 16B quantized) |
-| Mac Air M2 (16GB) | Frontend work, prompt writing, smaller models (7-8B), reviewing logs |
-| Mac Air M2 (8GB) | Same as above, close Ollama when not in active use |
 
 ## License
 
-Internal framework — True North Data Strategies.
+MIT — see [LICENSE](LICENSE).
 
-## Contact
+## Built by
 
-**Owner**: Jacob Johnston
-**Email**: jacob@truenorthstrategyops.com
-**Organization**: True North Data Strategies
-# AI-PARALLEL-AGENTS-TNCC
+Jacob Johnston | True North Data Strategies LLC | SDVOSB
+jacob@truenorthstrategyops.com
+# parallel-agentstack
